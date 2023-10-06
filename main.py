@@ -41,7 +41,6 @@ def main(conn, question):
     q = response["choices"][0]["text"]
 
     print(f"AI-generated SQL query: \n{q}")
-    print("Answer: \n")
 
     queries = [query+";" for query in q.split(";")]
 
@@ -50,6 +49,7 @@ def main(conn, question):
 
 def executeQuery(q):
   if ("SELECT" in q):
+      print("Answer: \n")
       select_from_table(conn, q)
   else:
       insert_into_table(conn, q)
