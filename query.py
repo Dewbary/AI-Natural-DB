@@ -16,6 +16,11 @@ def select_from_table(conn, query):
     for row in rows:
         print(row)
 
+def insert_into_table(conn, query):
+    cur = conn.cursor()
+    cur.execute(query)
+    conn.commit()
+
 if __name__ == "__main__":
     database = "./pythonsqlite.db"
     conn = create_connection(database)

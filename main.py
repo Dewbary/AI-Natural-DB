@@ -3,7 +3,9 @@ import openai
 import json
 
 from query import select_from_table
+from query import insert_into_table
 from schema import get_schema
+from schema import get_schema_with_examples
 from db import create_connection
 
 DATABASE = "./pythonsqlite.db"
@@ -18,10 +20,15 @@ def main(conn, question):
     print(f"Question: {question}")
 
     prompt = f"""
-    
-    Given the following SQL Schema:{get_schema()}
+
+    Given the following SQL Schema:{get_schema_with_examples()}
     Write a SQL query to answer this question: {question}
-    
+
+    Rules:
+    - Don't EVER insert into the types table
+    - Here is the list of available types: Fire, Water, Grass, Electric, Psychic, Rock, Ground, Ice, Flying, Poison
+    - when adding a new pokemon, use one of the types in the table
+
     """
 
     response = openai.Completion.create(
@@ -31,13 +38,21 @@ def main(conn, question):
         max_tokens=200
     )
 
-
     q = response["choices"][0]["text"]
 
     print(f"AI-generated SQL query: \n{q}")
     print("Answer: \n")
-    select_from_table(conn, q)
 
+    queries = [query+";" for query in q.split(";")]
+
+    for query in queries:
+      executeQuery(query);
+
+def executeQuery(q):
+  if ("SELECT" in q):
+      select_from_table(conn, q)
+  else:
+      insert_into_table(conn, q)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
